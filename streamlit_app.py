@@ -45,7 +45,7 @@ st.markdown(
 st.write("")
 
 st.subheader("Input Details")
-st.caption("Fill in the fields below. The help icons explain what each field means and why it matters to the prediction.")
+st.caption("Fill in the fields below. Each field includes a short description to explain what it represents and why it can affect the prediction.")
 
 col_left, col_right = st.columns(2)
 
@@ -56,35 +56,43 @@ with col_left:
     age = st.slider(
         "Age (years)",
         18, 95, 35,
-        help="Customer age in years. Age can affect the likelihood of subscribing due to life stage and financial goals."
+        help="Customer age in years. Age can relate to life stage and financial goals, which may influence interest in savings products."
     )
 
+    job_options = [model_to_ui(x) for x in [
+        "admin.", "blue-collar", "entrepreneur", "housemaid", "management",
+        "retired", "self-employed", "services", "student", "technician",
+        "unemployed", "unknown"
+    ]]
     job = st.selectbox(
         "Job type",
-        [model_to_ui(x) for x in [
-            "admin.", "blue-collar", "entrepreneur", "housemaid", "management",
-            "retired", "self-employed", "services", "student", "technician",
-            "unemployed", "unknown"
-        ]],
+        job_options,
+        index=job_options.index(DISPLAY_UNKNOWN),
         help="Customer’s occupation group. Different job types often correlate with different income stability and banking needs."
     )
 
+    marital_options = [model_to_ui(x) for x in ["married", "single", "divorced", "unknown"]]
     marital = st.selectbox(
         "Marital status",
-        [model_to_ui(x) for x in ["married", "single", "divorced", "unknown"]],
-        help="Customer’s marital status. This can be associated with household financial responsibilities and saving behavior."
+        marital_options,
+        index=marital_options.index(DISPLAY_UNKNOWN),
+        help="Customer’s marital status. This may reflect household responsibilities and saving priorities."
     )
 
+    education_options = [model_to_ui(x) for x in ["primary", "secondary", "tertiary", "unknown"]]
     education = st.selectbox(
         "Education level",
-        [model_to_ui(x) for x in ["primary", "secondary", "tertiary", "unknown"]],
-        help="Highest education level (grouped). This can be linked to income potential and financial literacy patterns."
+        education_options,
+        index=education_options.index(DISPLAY_UNKNOWN),
+        help="Highest education level (grouped). This can be associated with income potential and financial literacy patterns."
     )
 
+    default_options = [model_to_ui(x) for x in ["no", "yes", "unknown"]]
     default = st.selectbox(
         "Credit in default",
-        [model_to_ui(x) for x in ["no", "yes", "unknown"]],
-        help="Whether the customer has credit in default. Customers in default may be less likely to take up financial products."
+        default_options,
+        index=default_options.index(DISPLAY_UNKNOWN),
+        help="Whether the customer has previously failed to meet credit obligations. Customers in default may be less likely to subscribe to new financial products."
     )
 
     balance = st.number_input(
@@ -94,55 +102,62 @@ with col_left:
         help="Customer’s account balance in euros (can be negative). Balance may reflect saving capacity and financial health."
     )
 
+    housing_options = [model_to_ui(x) for x in ["no", "yes", "unknown"]]
     housing = st.selectbox(
         "Housing loan",
-        [model_to_ui(x) for x in ["no", "yes", "unknown"]],
+        housing_options,
+        index=housing_options.index(DISPLAY_UNKNOWN),
         help="Whether the customer has a housing loan. Existing commitments may influence willingness to subscribe."
     )
 
+    loan_options = [model_to_ui(x) for x in ["no", "yes", "unknown"]]
     loan = st.selectbox(
         "Personal loan",
-        [model_to_ui(x) for x in ["no", "yes", "unknown"]],
-        help="Whether the customer has a personal loan. This may reflect credit usage and monthly repayment obligations."
+        loan_options,
+        index=loan_options.index(DISPLAY_UNKNOWN),
+        help="Whether the customer has a personal loan. This may indicate ongoing repayment obligations that affect saving decisions."
     )
 
 with col_right:
     st.subheader("Campaign Behaviour")
-    st.caption("Information about how the customer was contacted and their interaction with the campaign.")
+    st.caption("Information about how the customer was contacted and their interaction with the marketing campaign.")
 
+    contact_options = [model_to_ui(x) for x in ["cellular", "telephone", "unknown"]]
     contact = st.selectbox(
         "Contact method",
-        [model_to_ui(x) for x in ["cellular", "telephone", "unknown"]],
-        help="How the customer was contacted. Contact method may affect response rates (e.g., reachable via mobile)."
+        contact_options,
+        index=contact_options.index("cellular"),
+        help="How the customer was contacted. Contact method can influence response rates and customer engagement."
     )
 
     month = st.selectbox(
         "Month of last contact",
         ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"],
-        help="Month when the last contact happened. Campaign timing can impact outcomes due to seasonal patterns."
+        index=0,
+        help="Month when the last contact happened. Campaign timing can affect outcomes due to seasonal patterns."
     )
 
     day = st.slider(
         "Day of month (last contact)",
         1, 31, 15,
-        help="Day of the month when the last contact happened. This can sometimes capture payday cycles or end-of-month behavior."
+        help="Day of the month when the last contact happened. This may sometimes capture payday cycles or end-of-month behavior."
     )
 
     duration = st.slider(
         "Call duration (seconds)",
-        0, 5000, 180,
+        0, 5000, 0,
         help="Length of the last call in seconds. Longer calls often indicate higher engagement, which can increase likelihood of subscription."
     )
 
     campaign = st.slider(
         "Contacts in this campaign",
-        1, 60, 2,
+        1, 60, 1,
         help="Number of contacts made during the current marketing campaign. Too many contacts may reduce success due to customer fatigue."
     )
 
     pdays = st.slider(
         "Days since previous contact (pdays)",
-        -1, 999, 999,
+        -1, 999, 0,
         help="Days since the customer was last contacted in a previous campaign. A value of 999 usually means the customer was not previously contacted."
     )
 
@@ -152,10 +167,12 @@ with col_right:
         help="Number of contacts performed before this campaign. Higher values indicate the customer has been approached before."
     )
 
+    poutcome_options = [model_to_ui(x) for x in ["failure", "success", "other", "unknown"]]
     poutcome = st.selectbox(
         "Previous campaign outcome",
-        [model_to_ui(x) for x in ["failure", "success", "other", "unknown"]],
-        help="Result of the previous marketing campaign (if any). A previous success can be a strong indicator of future subscription."
+        poutcome_options,
+        index=poutcome_options.index("failure"),
+        help="Result of the previous marketing campaign (if any). A previous success can strongly increase the likelihood of future subscription."
     )
 
 raw_input = pd.DataFrame([{
